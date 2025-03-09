@@ -1,19 +1,19 @@
 struct PINS {
-    int ENA = D5;
-    int ENB = D6;
-    int IN1 = D3;
-    int IN2 = D4;
-    int IN3 = D7;
-    int IN4 = D8;
-    int SERVO1 = D9;
-    int SERVO2 = D10;
-    int SERVO3 = D11;
-    int CH1 = A2;
+    int ENA = 5;
+    int ENB = 6;
+    int IN1 = 3;
+    int IN2 = 4;
+    int IN3 = 7;
+    int IN4 = 8;
+    int SERVO1 = 9;
+    int SERVO2 = 10;
+    int SERVO3 = 11;
+    int CH1 = A1;
     int CH2 = A2;
-    int CH3 = A2;
-    int CH4 = A2;
-    int CH5 = A2;
-    int CH6 = A2;
+    int CH3 = A3;
+    int CH4 = A4;
+    int CH5 = A5;
+    int CH6 = A0;
 } pins;
 
 struct RAW_CHANNELS {
@@ -32,9 +32,9 @@ void read_channels(){
     raw_channels.ch1 = pulseIn(pins.CH1, HIGH); 
     raw_channels.ch2 = pulseIn(pins.CH2, HIGH); 
     raw_channels.ch3 = pulseIn(pins.CH3, HIGH); 
-    raw_channels.ch4 = pulseIn(pins.CH4, HIGH); 
-    raw_channels.ch5 = pulseIn(pins.CH5, HIGH); 
-    raw_channels.ch6 = pulseIn(pins.CH6, HIGH); 
+    raw_channels.ch4 = pulseIn(pins.CH4, HIGH);
+    // raw_channels.ch5 = pulseIn(pins.CH5, HIGH); 
+    // raw_channels.ch6 = pulseIn(pins.CH6, HIGH); 
 }
 
 void print_channels(){
@@ -46,10 +46,10 @@ void print_channels(){
     Serial.print(raw_channels.ch3);
     Serial.print(" CH4: ");
     Serial.print(raw_channels.ch4);
-    Serial.print(" CH5: ");
-    Serial.print(raw_channels.ch5);
-    Serial.print(" CH6: ");
-    Serial.print(raw_channels.ch6);
+    // Serial.print(" CH5: ");
+    // Serial.print(raw_channels.ch5);
+    // Serial.print(" CH6: ");
+    // Serial.print(raw_channels.ch6);
     Serial.println();
 }
 
