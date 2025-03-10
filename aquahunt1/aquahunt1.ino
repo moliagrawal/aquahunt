@@ -105,4 +105,7 @@ void setup() {
 
 void loop() {
     read_channels();
+    // print_channels();
+    map_data();
+    delay(100);
 }
