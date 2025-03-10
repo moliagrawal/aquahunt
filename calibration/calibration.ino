@@ -23,39 +23,76 @@ struct RAW_CHANNELS {
     int ch4 = 0;
     int ch5 = 0;
     int ch6 = 0;
-} raw_channels;
+    int min_ch1 = 3000, min_ch2 = 3000, min_ch3 = 3000, min_ch4 = 3000, min_ch5 = 3000;
+    int max_ch1 = 0, max_ch2 = 0, max_ch3 = 0, max_ch4 = 0, max_ch5 = 0;
+} raw;
 
 int speed_left = 0;
 int speed_right = 0;
 
+
 void read_channels(){
-    raw_channels.ch1 = pulseIn(pins.CH1, HIGH); 
-    raw_channels.ch2 = pulseIn(pins.CH2, HIGH); 
-    raw_channels.ch3 = pulseIn(pins.CH3, HIGH); 
-    raw_channels.ch4 = pulseIn(pins.CH4, HIGH);
-    raw_channels.ch5 = pulseIn(pins.CH5, HIGH); 
-    raw_channels.ch6 = pulseIn(pins.CH6, HIGH); 
+    raw.ch1 = pulseIn(pins.CH1, HIGH); 
+    raw.ch2 = pulseIn(pins.CH2, HIGH); 
+    raw.ch3 = pulseIn(pins.CH3, HIGH); 
+    raw.ch4 = pulseIn(pins.CH4, HIGH);
+    raw.ch5 = pulseIn(pins.CH5, HIGH); 
+    raw.ch6 = pulseIn(pins.CH6, HIGH); 
+}
+
+void calibrate() {
+  while(pulseIn(pins.CH6, HIGH) == 0) {
+    Serial.println("Receiver not connected! ");
+    delay(1000);
+  }
+  if(pulseIn(pins.CH6, HIGH) < 1800) {
+    raw.min_ch1 = 1000, raw.min_ch2 = 1000, raw.min_ch3 = 1000, raw.min_ch4 = 1000, raw.min_ch5 = 1000;
+    raw.max_ch1 = 2000, raw.max_ch2 = 2000, raw.max_ch3 = 2000, raw.max_ch4 = 2000, raw.max_ch5 = 2000;
+    Serial.println("Default calibration values used");
+    return;
+  }
+
+  Serial.println("Caliberating...");
+
+  while(pulseIn(pins.CH6, HIGH) > 1800){
+    read_channels();
+    print_channels();
+    raw.min_ch1 = min(raw.min_ch1, raw.ch1);
+    raw.max_ch1 = max(raw.max_ch1, raw.ch1);
+    raw.min_ch2 = min(raw.min_ch2, raw.ch2);
+    raw.max_ch2 = max(raw.max_ch2, raw.ch2);
+    raw.min_ch3 = min(raw.min_ch3, raw.ch3);
+    raw.max_ch3 = max(raw.max_ch3, raw.ch3);
+    raw.min_ch4 = min(raw.min_ch4, raw.ch4);
+    raw.max_ch4 = max(raw.max_ch4, raw.ch4);
+    raw.min_ch5 = min(raw.min_ch5, raw.ch5);
+    raw.max_ch5 = max(raw.max_ch5, raw.ch5);
+  }
+
+  Serial.println("Caliberated Vales:");
+  Serial.println("Min: " + String(raw.min_ch1) + " " + String(raw.min_ch2) + " " + String(raw.min_ch3) + " " + String(raw.min_ch4) + " " + String(raw.min_ch5) + " ");
+  Serial.println("Max: " + String(raw.max_ch1) + " " + String(raw.max_ch2) + " " + String(raw.max_ch3) + " " + String(raw.max_ch4) + " " + String(raw.max_ch5) + " ");
 }
 
 void print_channels(){
     Serial.print("CH1: ");
-    Serial.print(raw_channels.ch1);
+    Serial.print(raw.ch1);
     Serial.print(" CH2: ");
-    Serial.print(raw_channels.ch2);
+    Serial.print(raw.ch2);
     Serial.print(" CH3: ");
-    Serial.print(raw_channels.ch3);
+    Serial.print(raw.ch3);
     Serial.print(" CH4: ");
-    Serial.print(raw_channels.ch4);
+    Serial.print(raw.ch4);
     Serial.print(" CH5: ");
-    Serial.print(raw_channels.ch5);
+    Serial.print(raw.ch5);
     Serial.print(" CH6: ");
-    Serial.print(raw_channels.ch6);
+    Serial.print(raw.ch6);
     Serial.println();
 }
 
 void map_data() {
-    speed_left = map(raw_channels.ch1, 1000, 2000, -255, 255);
-    speed_right = map(raw_channels.ch2, 1000, 2000, -255, 255);
+    speed_left = map(raw.ch1, 1000, 2000, -255, 255);
+    speed_right = map(raw.ch2, 1000, 2000, -255, 255);
     speed_left = max(-255, min(255, speed_left));
     speed_right = max(-255, min(255, speed_right));
     Serial.print("Speed Left: ");
@@ -103,11 +140,13 @@ void setup() {
     pinMode(pins.CH5, INPUT);
     pinMode(pins.CH6, INPUT);
     Serial.begin(9600);
+
+    calibrate();
 }
 
 void loop() {
     read_channels();
-    print_channels();
+    // print_channels();
     // map_data();
     delay(100);
 }
