@@ -30,13 +30,16 @@ struct RAW_CHANNELS {
 int speed_left = 0;
 int speed_right = 0;
 
+const int base_speed = 55;
+const int max_speed = 255;
+const float mixer_c = (max_speed - base_speed)/500.0;
 
 void read_channels(){
     raw.ch1 = pulseIn(pins.CH1, HIGH); 
     raw.ch2 = pulseIn(pins.CH2, HIGH); 
     raw.ch3 = pulseIn(pins.CH3, HIGH); 
     raw.ch4 = pulseIn(pins.CH4, HIGH);
-    raw.ch5 = pulseIn(pins.CH5, HIGH); 
+    raw.ch5 = pulseIn(pins.CH5, HIGH);
     raw.ch6 = pulseIn(pins.CH6, HIGH); 
 }
 
@@ -69,6 +72,11 @@ void calibrate() {
     raw.max_ch5 = max(raw.max_ch5, raw.ch5);
   }
 
+  raw.min_ch1 -= 1500;
+  raw.max_ch1 -= 1500;
+  raw.min_ch2 -= 1500;
+  raw.max_ch2 -= 1500;
+
   Serial.println("Caliberated Vales:");
   Serial.println("Min: " + String(raw.min_ch1) + " " + String(raw.min_ch2) + " " + String(raw.min_ch3) + " " + String(raw.min_ch4) + " " + String(raw.min_ch5) + " ");
   Serial.println("Max: " + String(raw.max_ch1) + " " + String(raw.max_ch2) + " " + String(raw.max_ch3) + " " + String(raw.max_ch4) + " " + String(raw.max_ch5) + " ");
@@ -91,10 +99,24 @@ void print_channels(){
 }
 
 void map_data() {
-    speed_left = map(raw.ch1, 1000, 2000, -255, 255);
-    speed_right = map(raw.ch2, 1000, 2000, -255, 255);
-    speed_left = max(-255, min(255, speed_left));
-    speed_right = max(-255, min(255, speed_right));
+
+  int ch1 = raw.ch1 * 500;
+  int ch2 = raw.ch2 * 500;
+
+  ch1 /= (raw.ch1 > 0) ? raw.max_ch1 : raw.min_ch1;
+  ch2 /= (raw.ch2 > 0) ? raw.max_ch2 : raw.min_ch2;
+
+  ch1 = max(-500, min(500, ch1));
+  ch2 = max(-500, min(500, ch2));
+
+  speed_left = mixer_c * ch1 + mixer_c * ch2 + base_speed;
+  speed_right = - mixer_c * ch1 + mixer_c * ch2 + base_speed;
+  
+
+    // speed_left = map(raw.ch1, 1000, 2000, -255, 255);
+    // speed_right = map(raw.ch2, 1000, 2000, -255, 255);
+    // speed_left = max(-255, min(255, speed_left));
+    // speed_right = max(-255, min(255, speed_right));
     Serial.print("Speed Left: ");
     Serial.print(speed_left);
     Serial.print(" Speed Right: ");
@@ -147,6 +169,6 @@ void setup() {
 void loop() {
     read_channels();
     // print_channels();
-    // map_data();
+    map_data();
     delay(100);
 }
