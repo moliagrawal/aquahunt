@@ -100,23 +100,25 @@ void print_channels(){
 
 void map_data() {
 
-  int ch1 = raw.ch1 * 500;
-  int ch2 = raw.ch2 * 500;
+  int ch1 = raw.ch1-1500;
+  int ch2 = raw.ch2-1500;
 
-  ch1 /= (raw.ch1 > 0) ? raw.max_ch1 : raw.min_ch1;
-  ch2 /= (raw.ch2 > 0) ? raw.max_ch2 : raw.min_ch2;
+  ch1 = (ch1 > 0) ? (ch1*500.0)/raw.max_ch1 : (ch1*(-500.0))/raw.min_ch1;
+  ch2 = (ch2 > 0) ? (ch2*500.0)/raw.max_ch2 : (ch2*(-500.0))/raw.min_ch2;
 
   ch1 = max(-500, min(500, ch1));
   ch2 = max(-500, min(500, ch2));
 
+
   speed_left = mixer_c * ch1 + mixer_c * ch2 + base_speed;
-  speed_right = - mixer_c * ch1 + mixer_c * ch2 + base_speed;
+  speed_right = -mixer_c * ch1 + mixer_c * ch2 + base_speed;
   
+  Serial.println("Ch1: " + String(raw.ch1) + " " + String(ch1) + " " "Ch2: " + String(raw.ch2) + " " + String(ch2) + " mapped: " + String(speed_left) + String(speed_right));
 
     // speed_left = map(raw.ch1, 1000, 2000, -255, 255);
     // speed_right = map(raw.ch2, 1000, 2000, -255, 255);
-    // speed_left = max(-255, min(255, speed_left));
-    // speed_right = max(-255, min(255, speed_right));
+    speed_left = max(-255, min(255, speed_left));
+    speed_right = max(-255, min(255, speed_right));
     Serial.print("Speed Left: ");
     Serial.print(speed_left);
     Serial.print(" Speed Right: ");
@@ -170,5 +172,5 @@ void loop() {
     read_channels();
     // print_channels();
     map_data();
-    delay(100);
+    delay(500);
 }
