@@ -49,8 +49,8 @@ void calibrate() {
     delay(1000);
   }
   if(pulseIn(pins.CH6, HIGH) < 1800) {
-    raw.min_ch1 = 1000, raw.min_ch2 = 1000, raw.min_ch3 = 1000, raw.min_ch4 = 1000, raw.min_ch5 = 1000;
-    raw.max_ch1 = 2000, raw.max_ch2 = 2000, raw.max_ch3 = 2000, raw.max_ch4 = 2000, raw.max_ch5 = 2000;
+    raw.min_ch1 = -480, raw.min_ch2 = -480, raw.min_ch3 = 1000, raw.min_ch4 = 1000, raw.min_ch5 = 1000;
+    raw.max_ch1 = 480, raw.max_ch2 = 480, raw.max_ch3 = 2000, raw.max_ch4 = 2000, raw.max_ch5 = 2000;
     Serial.println("Default calibration values used");
     return;
   }
@@ -165,7 +165,7 @@ void setup() {
     pinMode(pins.CH6, INPUT);
     Serial.begin(9600);
 
-    calibrate();
+    // calibrate();
 }
 
 void loop() {
