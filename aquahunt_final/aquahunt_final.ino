@@ -1,5 +1,3 @@
-// Code to pull channel one from A3
-
 #include <Servo.h>
 
 struct PINS {
@@ -45,14 +43,29 @@ float gripperfloat = 90;
 int val_servo1 = 180;
 int val_servo2 = 90;
 
+const float alpha = 0.2;  // Low pass filter constant, tune this for optimal smoothness
+
+int new_ch2, new_ch3, new_ch4, new_ch6;
 void read_channels() {
-  raw.ch1 = pulseIn(pins.CH4, HIGH);
-  raw.ch2 = pulseIn(pins.CH2, HIGH);
-  raw.ch3 = pulseIn(pins.CH3, HIGH);
-  // raw.ch4 = pulseIn(pins.CH4, HIGH);
-  raw.ch5 = pulseIn(pins.CH5, HIGH); 
-  raw.ch6 = pulseIn(pins.CH6, HIGH);
+  // Read raw pulse data
+  raw.ch1 = pulseIn(pins.CH1, HIGH);  // Direct mapping
+  new_ch2 = pulseIn(pins.CH2, HIGH);
+  new_ch3 = pulseIn(pins.CH3, HIGH);
+  new_ch4 = pulseIn(pins.CH4, HIGH);
+  raw.ch5 = pulseIn(pins.CH5, HIGH);  // Direct mapping
+  new_ch6 = pulseIn(pins.CH6, HIGH);
+  
+  // Apply low pass filter to smooth input values for channels 2, 3, 4, and 6
+  raw.ch2 = alpha * new_ch2 + (1 - alpha) * raw.ch2;
+  raw.ch3 = alpha * new_ch3 + (1 - alpha) * raw.ch3;
+  raw.ch4 = alpha * new_ch4 + (1 - alpha) * raw.ch4;
+  raw.ch6 = alpha * new_ch6 + (1 - alpha) * raw.ch6;
+
+  // Directly map channels 1 and 5 without filtering
+  // raw.ch1 = new_ch1;
+  // raw.ch5 = new_ch5;
 }
+
 
 void calibrate() {
   while (pulseIn(pins.CH5, HIGH) == 0) {
@@ -122,7 +135,7 @@ void print_channels() {
 
 void map_data() {
   // Mapping the motors
-  int ch1 = raw.ch1 - 1500;
+  int ch1 = raw.ch4 - 1500;
   int ch2 = raw.ch2 - 1500;
 
   if (ch1 > -20 and ch1 < 20 and ch2 > -20 and ch2 < 20) {
